@@ -60,7 +60,10 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Prepare sfos 5 build
-      run: rm -rf RPMS
+      run: |
+        rm -rf RPMS
+        docker rm -vf $(docker ps -aq)
+        docker rmi -f $(docker images -aq)
       
     - name: Build armv7hl
       uses: coderus/github-sfos-build@master
