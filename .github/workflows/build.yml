@@ -55,7 +55,7 @@ jobs:
           assets+=("$asset")
         done
         tag_name="${GITHUB_REF##*/}"
-        gh release create "$tag_name" "${assets[@]}" --title "$tag_name $RELEASE4"
+        gh release create "${tag_name}_${RELEASE4}" "${assets[@]}" --title "$tag_name $RELEASE4"
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -99,6 +99,6 @@ jobs:
           assets+=("$asset")
         done
         tag_name="${GITHUB_REF##*/}"
-        gh release create "$tag_name" "${assets[@]}" --title "$tag_name $RELEASE5"
+        gh release create "${tag_name}_${RELEASE5}" "${assets[@]}" --title "$tag_name $RELEASE5"
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
