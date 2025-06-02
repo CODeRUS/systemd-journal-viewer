@@ -6,16 +6,11 @@ on:
       - '*'
   pull_request:
     branches:
+    
       - master
-  workflow_dispatch:
-    inputs:
-      release:
-        description: 'RELEASE value'
-        required: false
-        default: '4.6.0.13'
-
 env:
-  RELEASE: ${{ inputs.release || '4.6.0.13' }}
+  RELEASE4: 4.6.0.13
+  RELEASE5: 5.0.0.43
 
 jobs:
   build:
@@ -24,28 +19,25 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    - name: Prepare
-      run: mkdir output
+    - name: Prepare sfos 4 build
+      run: rm -rf RPMS
       
     - name: Build armv7hl
-      id: build_armv7hl
       uses: coderus/github-sfos-build@master
       with:
-        release: ${{ env.RELEASE }}
+        release: ${{ env.RELEASE4 }}
         arch: armv7hl
 
     - name: Build aarch64
-      id: build_aarch64
       uses: coderus/github-sfos-build@master
       with:
-        release: ${{ env.RELEASE }}
+        release: ${{ env.RELEASE4 }}
         arch: aarch64
 
     - name: Build i486
-      id: build_i486
       uses: coderus/github-sfos-build@master
       with:
-        release: ${{ env.RELEASE }}
+        release: ${{ env.RELEASE4 }}
         arch: i486
       
     - name: Upload build result
@@ -63,6 +55,46 @@ jobs:
           assets+=("$asset")
         done
         tag_name="${GITHUB_REF##*/}"
-        gh release create "$tag_name" "${assets[@]}"
+        gh release create "$tag_name" "${assets[@]}" --title "$tag_name $RELEASE4"
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Prepare sfos 5 build
+      run: rm -rf RPMS
+      
+    - name: Build armv7hl
+      uses: coderus/github-sfos-build@master
+      with:
+        release: ${{ env.RELEASE5 }}
+        arch: armv7hl
+
+    - name: Build aarch64
+      uses: coderus/github-sfos-build@master
+      with:
+        release: ${{ env.RELEASE5 }}
+        arch: aarch64
+
+    - name: Build i486
+      uses: coderus/github-sfos-build@master
+      with:
+        release: ${{ env.RELEASE5 }}
+        arch: i486
+      
+    - name: Upload build result
+      uses: actions/upload-artifact@v4
+      with:
+        name: output-rpms
+        path: RPMS
+
+    - name: Create release
+      if: contains(github.ref, 'release')
+      run: |
+        set -x
+        assets=()
+        for asset in RPMS/*.rpm; do
+          assets+=("$asset")
+        done
+        tag_name="${GITHUB_REF##*/}"
+        gh release create "$tag_name" "${assets[@]}" --title "$tag_name $RELEASE5"
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
